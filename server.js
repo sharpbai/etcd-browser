@@ -33,7 +33,8 @@ var serverPort = process.env.SERVER_PORT || 8000;
 var publicDir = 'frontend';
 var authUser = process.env.AUTH_USER;
 var authPass = process.env.AUTH_PASS;
-
+var etcdAuthUser = process.env.ETCD_AUTH_USER;
+var etcdAuthPass = process.env.ETCD_AUTH_PASS;
 
 
 var mimeTypes = {
@@ -91,6 +92,13 @@ function proxy(client_req, client_res) {
     opts.key = fs.readFileSync(key_file);
     opts.ca = fs.readFileSync(ca_file);
     opts.cert = fs.readFileSync(cert_file);
+  }
+
+  // etcd http basic auth
+  if(etcdAuthUser && etcdAuthPass) {
+    opts.headers = {
+      "Authorization" : "Basic " + new Buffer(etcdAuthUser + ':' + etcdAuthPass).toString('base64')
+    }
   }
 
   client_req.pipe(requester(opts, function(res) {
